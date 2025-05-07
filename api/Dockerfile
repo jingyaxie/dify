@@ -6,6 +6,11 @@ WORKDIR /app/api
 # Install uv
 ENV UV_VERSION=0.6.14
 
+# 国内加速：apt和pip
+RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources \
+    && sed -i 's@security.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources \
+    && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
 RUN pip install --no-cache-dir uv==${UV_VERSION}
 
 
