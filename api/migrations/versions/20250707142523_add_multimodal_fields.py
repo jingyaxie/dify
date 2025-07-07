@@ -33,7 +33,7 @@ def upgrade():
         sa.Column('image_model_name', sa.String(100), nullable=True),
         sa.Column('video_model_provider', sa.String(50), nullable=True),
         sa.Column('video_model_name', sa.String(100), nullable=True),
-        sa.Column('enabled', sa.Boolean(), default=True),
+        sa.Column('enabled', sa.Boolean(), default=True, server_default=sa.text('true')),
         sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP(0)'), nullable=True),
         sa.Column('updated_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP(0)'), nullable=True),
         sa.PrimaryKeyConstraint('id', name='multimodal_config_pkey'),

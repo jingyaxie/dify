@@ -1166,7 +1166,7 @@ class MultimodalConfig(Base):
     image_model_name = db.Column(db.String(100), nullable=True)
     video_model_provider = db.Column(db.String(50), nullable=True)
     video_model_name = db.Column(db.String(100), nullable=True)
-    enabled = db.Column(db.Boolean, default=True)
+    enabled = db.Column(db.Boolean, default=True, server_default=db.text("true"))
     created_at = db.Column(db.DateTime, default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
 

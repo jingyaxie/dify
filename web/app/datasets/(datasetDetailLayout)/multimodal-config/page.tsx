@@ -34,7 +34,7 @@ const MultimodalConfigPage = () => {
       const data = await response.json()
       if (data.code === 0) {
         setConfig(data.data || {
-          enabled: false,
+          enabled: true,
           image_model_provider: 'openai',
           image_model_name: 'gpt-4-vision-preview',
           video_model_provider: 'openai',

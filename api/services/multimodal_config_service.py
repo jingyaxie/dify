@@ -36,10 +36,10 @@ class MultimodalConfigService:
             config = MultimodalConfig(
                 tenant_id=tenant_id,
                 dataset_id=dataset_id,
-                image_model_provider=data.get('image_model_provider'),
-                image_model_name=data.get('image_model_name'),
-                video_model_provider=data.get('video_model_provider'),
-                video_model_name=data.get('video_model_name'),
+                image_model_provider=data.get('image_model_provider', 'openai'),
+                image_model_name=data.get('image_model_name', 'gpt-4-vision-preview'),
+                video_model_provider=data.get('video_model_provider', 'openai'),
+                video_model_name=data.get('video_model_name', 'whisper-1'),
                 enabled=data.get('enabled', True)
             )
             db.session.add(config)
