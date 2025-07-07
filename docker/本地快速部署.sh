@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Dify 本地快速部署脚本
+# 一键部署，避免端口冲突
+
+echo "🚀 Dify 本地快速部署..."
+
+# 检查Docker
+if ! docker info > /dev/null 2>&1; then
+    echo "❌ 请先启动 Docker"
+    exit 1
+fi
+
+# 创建本地特色端口配置
+cat > .env << 'EOF'
+# 本地特色端口配置
+EXPOSE_NGINX_PORT=5001
+EXPOSE_NGINX_SSL_PORT=5002
+EXPOSE_POSTGRES_PORT=5433
+EXPOSE_REDIS_PORT=6381
+EXPOSE_WEAVIATE_PORT=8081
+EXPOSE_SANDBOX_PORT=8195
+EXPOSE_SSRF_PROXY_PORT=3129
+EXPOSE_PLUGIN_DAEMON_PORT=5003
+EXPOSE_PLUGIN_DEBUGGING_PORT=5004
+
+# 初始化密码
+INIT_PASSWORD=dify2024
+
+# 数据库配置
+POSTGRES_PASSWORD=dify2024
+REDIS_PASSWORD=dify2024
+
+# 开发环境配置
+DEBUG=true
+FLASK_DEBUG=true
+ENABLE_REGISTER=true
+DEPLOY_ENV=DEVELOPMENT
