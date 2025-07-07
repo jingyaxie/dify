@@ -33,7 +33,6 @@ from core.rag.extractor.multimodal_video_extractor import MultimodalVideoExtract
 from core.rag.models.document import Document
 from extensions.ext_storage import storage
 from models.model import UploadFile
-from services.multimodal_config_service import MultimodalConfigService
 
 SUPPORT_URL_CONTENT_TYPES = ["application/pdf", "text/plain", "application/json"]
 USER_AGENT = (
@@ -114,21 +113,24 @@ class ExtractProcessor:
                 extractor: Optional[BaseExtractor] = None
                 
                 # 多模态文件类型检测和处理
-                multimodal_enabled = False
-                tenant_id = upload_file.tenant_id if hasattr(upload_file, 'tenant_id') else None
-                dataset_id = upload_file.dataset_id if hasattr(upload_file, 'dataset_id') else None
-                if tenant_id and dataset_id:
-                    config = MultimodalConfigService.get_config(tenant_id, dataset_id)
-                    if config and getattr(config, 'enabled', False):
-                        multimodal_enabled = True
-                if file_extension in MULTIMODAL_IMAGE_EXTENSIONS and multimodal_enabled:
+                if file_extension in MULTIMODAL_IMAGE_EXTENSIONS:
                     # 图片文件处理
-                    image_extractor = MultimodalImageExtractor(tenant_id)
-                    return image_extractor.extract(file_path, file_url=getattr(upload_file, 'url', None))
-                elif file_extension in MULTIMODAL_VIDEO_EXTENSIONS and multimodal_enabled:
+                    tenant_id = upload_file.tenant_id if hasattr(upload_file, 'tenant_id') else None
+                    if tenant_id:
+                        image_extractor = MultimodalImageExtractor(tenant_id)
+                        return image_extractor.extract(file_path, file_url=getattr(upload_file, 'url', None))
+                    else:
+                        # 如果没有tenant_id，使用默认文本提取器
+                        extractor = TextExtractor(file_path, autodetect_encoding=True)
+                elif file_extension in MULTIMODAL_VIDEO_EXTENSIONS:
                     # 视频文件处理
-                    video_extractor = MultimodalVideoExtractor(tenant_id)
-                    return video_extractor.extract(file_path, file_url=getattr(upload_file, 'url', None))
+                    tenant_id = upload_file.tenant_id if hasattr(upload_file, 'tenant_id') else None
+                    if tenant_id:
+                        video_extractor = MultimodalVideoExtractor(tenant_id)
+                        return video_extractor.extract(file_path, file_url=getattr(upload_file, 'url', None))
+                    else:
+                        # 如果没有tenant_id，使用默认文本提取器
+                        extractor = TextExtractor(file_path, autodetect_encoding=True)
                 else:
                     # 其他文件类型按原有逻辑处理
                     if etl_type == "Unstructured":

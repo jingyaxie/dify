@@ -365,6 +365,13 @@ class Document(Base):
     doc_metadata = db.Column(JSONB, nullable=True)
     doc_form = db.Column(db.String(255), nullable=False, server_default=db.text("'text_model'::character varying"))
     doc_language = db.Column(db.String(255), nullable=True)
+    
+    # 多模态相关字段
+    multimodal_type = db.Column(db.String(20), nullable=True)  # 'image', 'video'
+    original_url = db.Column(db.Text, nullable=True)  # 原始文件URL
+    processed_content = db.Column(db.Text, nullable=True)  # 处理后的内容
+    model_used = db.Column(db.String(100), nullable=True)  # 使用的模型
+    processing_time = db.Column(db.Float, nullable=True)  # 处理耗时
 
     DATA_SOURCES = ["upload_file", "notion_import", "website_crawl"]
 
@@ -1142,3 +1149,41 @@ class DatasetMetadataBinding(Base):
     document_id = db.Column(StringUUID, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
     created_by = db.Column(StringUUID, nullable=False)
+
+
+class MultimodalConfig(Base):
+    __tablename__ = "multimodal_configs"
+    __table_args__ = (
+        db.PrimaryKeyConstraint("id", name="multimodal_config_pkey"),
+        db.Index("multimodal_config_tenant_idx", "tenant_id"),
+        db.Index("multimodal_config_dataset_idx", "dataset_id"),
+    )
+
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
+    tenant_id = db.Column(StringUUID, nullable=False)
+    dataset_id = db.Column(StringUUID, nullable=False)
+    image_model_provider = db.Column(db.String(50), nullable=True)
+    image_model_name = db.Column(db.String(100), nullable=True)
+    video_model_provider = db.Column(db.String(50), nullable=True)
+    video_model_name = db.Column(db.String(100), nullable=True)
+    enabled = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=func.current_timestamp())
+    updated_at = db.Column(db.DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
+
+    @property
+    def dataset(self):
+        return db.session.query(Dataset).filter(Dataset.id == self.dataset_id).one_or_none()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "tenant_id": self.tenant_id,
+            "dataset_id": self.dataset_id,
+            "image_model_provider": self.image_model_provider,
+            "image_model_name": self.image_model_name,
+            "video_model_provider": self.video_model_provider,
+            "video_model_name": self.video_model_name,
+            "enabled": self.enabled,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
